@@ -6,6 +6,12 @@ import Logo from './Components/Logo/Logo';
 import Rank from './Components/Rank/Rank';
 import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm';
 import Particles from 'react-particles-js';
+import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
+import Clarifai from 'clarifai';
+
+const app = new Clarifai.App({
+ apiKey: '66c26976e675482eaa843e8fc6b634ca'
+});
 
 class App extends Component {
   constructor() {
@@ -13,8 +19,7 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: '',
-      box: {},
-
+      box: {}
     }
   }
 
@@ -27,13 +32,14 @@ class App extends Component {
     app.models
       .predict(
         Clarifai.FACE_DETECT_MODEL,
+        // 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&h=350'
         this.state.input
       )
       .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
       .catch(err => console.log(err));
   }
 
-  displayFaceBox = () => {
+  displayFaceBox = (box) => {
     this.setState({ box: box })
   }
 
@@ -43,7 +49,7 @@ class App extends Component {
     const height = Number(image.height);
     const width = Number(image.width);
     return {
-      leftCol: clarifaiFace.left_col * width, // // first is percentage of the width. if we multiply it by 'width', we will get the width of the actual displayed image - where the left column should be.
+      leftCol: clarifaiFace.left_col * width,
       topRow: clarifaiFace.top_row * height,
       rightCol: width - (clarifaiFace.right_col * width),
       bottomRow: height - (clarifaiFace.bottom_row * height)
@@ -59,10 +65,11 @@ class App extends Component {
         <Rank />
         <ImageLinkForm 
           onInputChange={this.onInputChange}
+          onButtonSubmit={this.onButtonSubmit}
         />
         <FaceRecognition 
-          imageUrl={imageUrl}
-          box={box}
+          imageUrl={this.imageUrl}
+          box={this.box}
         />
       </div>
     )
